@@ -1,0 +1,1 @@
+<?php vF_Check();# ----------------------# Class: Install# Author: Yplit# Date: 13/6/2012#-----------------------class vF_install{	private $_instance;	public function __construct()	{	}	public static function getInstance()	{		if( !self::$_instance )		{			self::$_instance = new self();		}		return self::$_instance;	}	public function process()	{	}}

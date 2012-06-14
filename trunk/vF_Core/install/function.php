@@ -1,0 +1,1 @@
+<?php vF_Check();# ----------------------# File: Function for install# Author: Yplit# Date: 13/6/2012#-----------------------?>
