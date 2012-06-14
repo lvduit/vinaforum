@@ -9,6 +9,7 @@ $vF_Config = stdClass;
   $vF_Config->dbuser = 'root';
   $vF_Config->dbpass = '';
   $vF_Config->dbname = 'vinaforum';
+  $vF_Config->tablePrefix = 'vF_';
 # -------------------------------
 
 
