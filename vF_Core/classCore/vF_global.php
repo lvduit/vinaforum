@@ -1,0 +1,1 @@
+<?php vF_Check();# ----------------------# Class: Global# Author: Yplit# Date: 14/6/2012#-----------------------class vF_global{	global $vF;	public function __construct( $vF )	{		$this->vF = $vF;	}}
