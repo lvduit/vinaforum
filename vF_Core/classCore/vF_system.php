@@ -14,14 +14,15 @@ class vF_system
 	public $host = '';
 	public $secure = '';
 	public $key = '';
+	public $time;
+	public $config;
+	public $vF;
 	
 	public function __construct()
 	{
-		global $vF;
+		$this->vF = $vF;
 		if( $this->_install ) return;
-		
 		$this->key = $vF_Config->key;
-		
 		$this->_install = true;
 		return;
 	}
@@ -40,21 +41,24 @@ class vF_system
 	{
 		if( $this->_system_started ) return;
 
-		if( defined( 'VF_MEMORY_LIMIT' ) and VF_MEMORY_LIMIT > 0 )
-		{
-			$this->setMemoryLimit( VF_MEMORY_LIMIT );
-		}
-
-		if (!@ini_get('output_handler')) while (@ob_end_clean());
+		$this->_loadConfig();
+		if( vF_constant::vF_MEMORY_LIMIT > 0 ) $this->setMemoryLimit( vF_constant::vF_MEMORY_LIMIT );
+		if (!@ini_get('output_handler')) while ( @ob_end_clean() );
 		error_reporting(E_ALL | E_STRICT & ~8192);
-
 		date_default_timezone_set('UTC');
-
 		$this->host = ( empty( $_SERVER['HTTP_HOST'] ) ? '' : $_SERVER['HTTP_HOST'] );
-
 		$this->secure = ( isset( $_SERVER['HTTPS'] ) and $_SERVER['HTTPS'] == 'on' );
-
+		$this->time = time();
+		if( !$_COOKIE ) $_COOKIE = array();
+		if( !$_SESSION ) @session_start();
+		session_save_path( vF_DIR . '/' . vF_constant::vF_SESSION_DIR . '/' );
+		
 		$this->_system_started = true;
+	}
+
+	private function _loadConfig()
+	{
+		$this->config = $GLOBALS['vF_Config'];
 	}
 
 	public function setMemoryLimit( $limit )
