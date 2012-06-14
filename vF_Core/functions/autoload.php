@@ -1,29 +1,40 @@
 <?php 
 vf_check();
 
-// Auto Load Class 
-function __autoload( $class )
+# ----------------------
+# Function: Auto load classCore
+# Author: Yplit
+# Date: 14/6/2012
+#-----------------------
+function __autoload( $className )
 {
-	if( preg_match( '/[^A-z0-9_]/', $class ) )
+	if( preg_match( '/[^A-z0-9_]/', $className ) )
 	{
 		return false;
 	}
 
-	$class = 'vF_' . $class;
-
-	if( class_exists( $class ) )
+	if( class_exists( $className ) )
 	{
-		return false;
-	}
-
-	if( file_exists( VF_DIR . '/vF_Core/classCore/' . $class . '.php' ) )	
-	{
-		require( VF_DIR . '/vF_Core/classCore/' . $class . '.php' );
 		return true;
 	}
-	elseif( defined( 'VF_MODULE' ) and file_exists( VF_DIR . '/vF_Core/module/' . VF_MODULE . '/class/' . $class . '.php' ) )
+
+	if( substr( $className, 0, 10 ) == 'vF_Module_' ) // Module Custom Class
 	{
-		require( VF_DIR . '/vF_Core/module/' . VF_MODULE . '/class/' . $class . '.php' );
+		if( !class_exists( 'vF_constant' ) )
+		{
+			require( vF_DIR . '/vF_Core/classCore/vF_constant.php' );
+		}
+		$classPath = vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/class/' . $className . '.php';
+	}
+	else
+	{
+		// Class Core
+		$classPath = vF_DIR . '/vF_Core/classCore/' . $className . '.php';
+	}
+
+	if( file_exists( $classPath ) )
+	{
+		require( $classPath );
 		return true;
 	}
 
