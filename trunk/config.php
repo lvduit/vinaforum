@@ -1,25 +1,31 @@
 <?php 
 if( !defined( 'IS_VF' ) ) die();
 
-$vF_Config = stdClass;
 
-# ------------------------------
-# SQL Infomation
-  $vF_Config->dbhost = 'localhost';
-  $vF_Config->dbuser = 'root';
-  $vF_Config->dbpass = '';
-  $vF_Config->dbname = 'vinaforum';
-  $vF_Config->tablePrefix = 'vF_';
-# -------------------------------
+class vF_configForum
+{
+
+	# ------------------------------
+	# SQL Infomation
+	  var $dbhost = 'localhost';
+	  var $dbuser = 'root';
+	  var $dbpass = '';
+	  var $dbname = 'vinaforum';
+	  var $tablePrefix = 'vF_';
+	# -------------------------------
 
 
-# -------------------------------
-# Developer Options
-  $vF_Config->debug = false;
-  $vF_Config->adminIpOnly = false;
-# -------------------------------
+	# -------------------------------
+	# Developer Options
+	  var $debug = true;
+	  var $adminIpOnly = false;
+	# -------------------------------
 
-# -------------------------------
-# Not Change
-  $vF_Config->key = '8300f1006560ab382348760502d3c760';
-# -------------------------------
+	# -------------------------------
+	# Not Change
+	  var $key = '8300f1006560ab382348760502d3c760';
+	# -------------------------------
+
+}
+
+$vF_Config = new vF_configForum();
