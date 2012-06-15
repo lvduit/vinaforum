@@ -8,7 +8,7 @@ vF_Check();
 #-----------------------
 class vF_init
 {
-	private $_instance;
+	private static $_instance;
 	public $User;
 	public $Client;
 	public $Options;
@@ -18,7 +18,7 @@ class vF_init
 	{
 	}
 
-	public function getInstance()
+	public static function getInstance()
 	{
 		if( !self::$_instance )
 		{

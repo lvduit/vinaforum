@@ -3,7 +3,7 @@ vF_Check();
 
 class vF_Hash
 {
-	private $_instance;
+	private static $_instance;
 	public $hash_type = 'sha1';
 	public $hash_salt = '';
 
@@ -11,7 +11,7 @@ class vF_Hash
 	{
 	}
 
-	public function getInstance()
+	public static function getInstance()
 	{
 		if( !self::$_instance )
 		{
@@ -47,5 +47,9 @@ class vF_Hash
 	public function _sha1( $string_to_sha1 )
 	{
 		return sha1( sha1( $string_to_sha1 ) );
+	}
+
+	public function hash()
+	{
 	}
 }

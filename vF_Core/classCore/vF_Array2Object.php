@@ -8,7 +8,7 @@ vF_Check();
 #-----------------------
 class vF_Array2Object
 {
-	private $_instance;
+	private static $_instance;
 	private $_object;
 	public $convert_all_sub_array = false;
 
@@ -16,7 +16,7 @@ class vF_Array2Object
 	{
 	}
 
-	public function getInstance()
+	public static function getInstance()
 	{
 		if( !self::$_instance )
 		{

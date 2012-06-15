@@ -8,7 +8,7 @@ vf_check();
 #-----------------------
 class vF_system
 {
-	private $_instance;
+	private static $_instance;
 	private $_memoryLimit = null;
 	private $_system_started;
 	public $host = '';
@@ -20,7 +20,7 @@ class vF_system
 	
 	public function __construct()
 	{
-		$this->vF = $vF;
+		$this->vF = $GLOBALS['vF'];
 		if( $this->_install ) return;
 		$this->key = $vF_Config->key;
 		$this->_install = true;
@@ -49,8 +49,8 @@ class vF_system
 		$this->host = ( empty( $_SERVER['HTTP_HOST'] ) ? '' : $_SERVER['HTTP_HOST'] );
 		$this->secure = ( isset( $_SERVER['HTTPS'] ) and $_SERVER['HTTPS'] == 'on' );
 		$this->time = time();
-		if( !$_COOKIE ) $_COOKIE = array();
-		if( !$_SESSION ) @session_start();
+		if( !isset( $_COOKIE ) ) $_COOKIE = array();
+		if( !isset( $_SESSION ) ) @session_start();
 		session_save_path( vF_DIR . '/' . vF_constant::vF_SESSION_DIR . '/' );
 		
 		$this->_system_started = true;

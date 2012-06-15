@@ -8,8 +8,8 @@ vf_check();
 #-----------------------
 class vF_input
 {
-	private $_instance;
-	global $vF;
+	private static $_instance;
+	public $vF;
 	private $_method = array( 
 		'_GET', '_POST', '_REQUEST', '_COOKIE', '_SESSION', '_SERVER', '_ENV'
 	);
@@ -42,7 +42,7 @@ class vF_input
 		$this->vF = $GLOBALS['vF'];
 	}
 
-	public function getInstance()
+	public static function getInstance()
 	{
 		if( !self::$_instance )
 		{
@@ -203,5 +203,9 @@ class vF_input
 			case 'r': default: return $this->getRequest( $keyName, $default );
 		}
 		return false;
+	}
+
+	public function getGet( $keyName, $defaul = '' )
+	{
 	}
 }

@@ -8,7 +8,7 @@ vF_Check();
 #-----------------------
 class vF_getVf
 {
-	private $_instance;
+	private static $_instance;
 	private $vF;
 
 	public function __construct()
@@ -16,7 +16,7 @@ class vF_getVf
 		$this->vF = $GLOBALS['vF'];
 	}
 
-	public function get( $getName )
+	public static function get( $getName )
 	{
 		if( !self::$_instance )
 		{
