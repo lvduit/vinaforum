@@ -8,7 +8,7 @@ vF_Check();
 #-----------------------
 class vF_getClient
 {
-	static $instance;
+	private static $_instance;
 	public $IP;
 	public $browser;
 	public $Os;
@@ -20,16 +20,16 @@ class vF_getClient
 	{
 	}
 
-	public static getInstance()
+	public static function getInstance()
 	{
-		if( !self::$instance )
+		if( !self::$_instance )
 		{
-			self::$instance = new self();
+			self::$_instance = new self();
 		}
-		return self::$instance;
+		return self::$_instance;
 	}
 
-	public static getClient()
+	public function getClient()
 	{
 		require( vF_DIR . '/vF_Core/functions/client.php' );
 		if( !$this->IP ) $this->IP = $this->_getIP();
@@ -43,7 +43,7 @@ class vF_getClient
 		}
 	}
 
-	private function _getIP()
+	private function _getIP( $format = false )
 	{
 		if( vF_GetEnv( 'HTTP_CLIENT_IP' ) and strcasecmp( vF_GetEnv( 'HTTP_CLIENT_IP' ), 'unknown' ) )
 		{

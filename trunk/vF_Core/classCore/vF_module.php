@@ -8,7 +8,7 @@ vF_Check();
 #-----------------------
 class vF_module
 {
-	private $_instance;
+	private static $_instance;
 	public $currentModule = 'forum';
 	public $listModule = array();
 	public $vF;
@@ -26,18 +26,6 @@ class vF_module
 		}
 
 		return self::$_instance;
-	}
-
-	public function loadModule( $moduleName )
-	{
-		if( $this->isModule( $modulename ) )
-		{
-			$this->setCurrentModule( $moduleName );
-			$this->modulePermission( $moduleName );
-			$this->_connectModule();
-		}
-
-		vF_Error::getInstance()->notModule( $moduleName );
 	}
 
 	public function setCurrentModule( $moduleName )
@@ -124,7 +112,10 @@ class vF_module
 
 		if( !$listModule )
 		{
-			$db = vF_getVf::get('db');
+			// For Test
+				$this->vF->Options->vf_default_module = 'forum';
+			//
+			$db = vF_getVf::get('Db');
 			$db->query( 'SELECT `moduleName` FROM `'. $db->tableName( 'modules' ) .'` WHERE `active` = 1 ' );
 			if( $db->nums() == 0 ) return $this->vF->Options->vf_default_module;
 			$listModule = $db->fetchrow();
@@ -151,7 +142,7 @@ class vF_module
 			$option = $vF_moduleOptionsDefault;
 		}
 
-		vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php'
+		vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php';
 		if( file_exists( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php' ) )
 		{
 			require( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php' );
