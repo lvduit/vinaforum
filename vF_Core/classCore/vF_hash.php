@@ -6,9 +6,11 @@ class vF_Hash
 	private static $_instance;
 	public $hash_type = 'sha1';
 	public $hash_salt = '';
+	public $vF;
 
 	public function __construct()
 	{
+		$this->vF = $GLOBALS['vF'];
 	}
 
 	public static function getInstance()
