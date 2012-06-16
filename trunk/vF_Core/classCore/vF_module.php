@@ -132,23 +132,41 @@ class vF_module
 
 	public function loadModule( $moduleName )
 	{
+		if( !file_exists( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName ) )
+		{
+			vF_error::getInstance()->moduleError( $moduleName );
+		}
+
 		$this->setCurrentModule( $moduleName );
 
-		require( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/isModules.php' );
+		if( !file_exists( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/isModule.php' ) )
+		{
+			if( $this->vF->system->debug )
+			{
+				// Fix it later
+				return;
+			}
+		}
 
-		$option = vF_input::getStringParam( vF_constant::vF_MODULE_OPTION_PARAM, 'g', '' );
+		require( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/isModule.php' );
+
+		$option = vF_input::getinstance()->getStringParam( vF_constant::vF_MODULE_OPTION_PARAM, 'g', '' );
+
 		if( empty( $option ) AND $vF_moduleOptionsDefault AND !empty( $vF_moduleOptionsDefault ) )
 		{
 			$option = $vF_moduleOptionsDefault;
 		}
-
-		vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php';
-		if( file_exists( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php' ) )
+		elseif( empty( $option ) )
 		{
-			require( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '/main.php' );
+			$option = 'main';
+		}
+
+		if( file_exists( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '.php' ) )
+		{
+			require( vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/' . $moduleName . '/options/' . $option . '.php' );
 			return true;
 		}
 
-		vF_Error::getInstance()->moduleError( $moduleName );
+		vF_error::getInstance()->moduleOptionsError( $option );
 	}
 }
