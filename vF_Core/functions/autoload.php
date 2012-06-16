@@ -26,6 +26,10 @@ function __autoload( $className )
 		}
 		$classPath = vF_DIR . '/vF_Core/' . vF_constant::vF_MODULE_DIR . '/class/' . $className . '.php';
 	}
+	elseif( substr( $className, 0 , 10 ) == 'vF_helper_' ) // Helper Class
+	{
+		$classPath = vF_DIR . '/vF_Core/helper/' . $className . '.php'; 
+	}
 	else
 	{
 		// Class Core
