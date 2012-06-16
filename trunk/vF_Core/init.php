@@ -7,10 +7,9 @@ vf_check();
 if( $vF ) return;
 
 vF_config::getInstance()->loadConfig( vF_DIR . '/' . vF_constant::vF_CONFIG_FILE, $vF_Config );
-
 global $vF_Config; 
-
 global $vF;
+
 $vF = vF_init::getInstance();
 $vF->System = vF_system::getInstance();
 $vF->System->startSystem();
