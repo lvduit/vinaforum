@@ -1,0 +1,1 @@
+<?php vF_Check();class vF_templateCompilerException extends vF_exception{	protected $_lineNumber = 0;	public function setLineNumber($lineNumber)	{		$this->_lineNumber = intval($lineNumber);	}	public function getLineNumber()	{		return $this->_lineNumber;	}}
