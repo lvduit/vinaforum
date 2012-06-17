@@ -24,11 +24,19 @@ class vF_system
 	public $curlSupport;
 	public $opendirSupport;
 	public $rewriteSupport;
+	public $serverProtocol = 'http';
+	public $serverName = '';
+	public $serverPort = '';
+	public $forumDomain = '';
+	public $siteUrl = '';
+	public $adminUrl = '';
+	public $adminFile = 'admincp.php';
+	public $forumPath;
 	public $vF;
 	
 	public function __construct()
 	{
-		$this->vF = $GLOBALS['vF'];
+		//$this->vF = $GLOBALS['vF'];
 		if( $this->_install ) return;
 		$this->key = $vF_Config->key;
 		$this->_install = true;
@@ -49,7 +57,13 @@ class vF_system
 	{
 		if( $this->_systemStarted ) return;
 
+		if ( headers_sent() OR connection_status() != 0 OR connection_aborted() )
+		{
+			vF_error::getInstance()->systemError( vF_constant::IS_HEADERS_SENT );
+		}
+
 		$this->_loadConfig();
+
 		if( vF_constant::vF_MEMORY_LIMIT > 0 ) $this->setMemoryLimit( vF_constant::vF_MEMORY_LIMIT );
 		if (!@ini_get('output_handler')) while ( @ob_end_clean() );
 
@@ -58,10 +72,7 @@ class vF_system
 
 		$this->host = ( empty( $_SERVER['HTTP_HOST'] ) ? '' : $_SERVER['HTTP_HOST'] );
 		$this->secure = ( isset( $_SERVER['HTTPS'] ) and $_SERVER['HTTPS'] == 'on' );
-		$this->time = time();
-		if( !isset( $_COOKIE ) ) $_COOKIE = array();
-		if( !isset( $_SESSION ) ) @session_start();
-		session_save_path( vF_DIR . '/' . vF_constant::vF_SESSION_DIR . '/' );
+		$this->time = microtime( true );
 
 		$this->disableFunctions = ( ( $disable_functions = ini_get( "disable_functions" ) ) != "" and $disable_functions != false ) ? array_map( 'trim', preg_split( "/[\s,]+/", $disable_functions ) ) : array();
 		$this->safeMode = ( ini_get( 'safe_mode' ) == '1' || strtolower( ini_get( 'safe_mode' ) ) == 'on' ) ? true : false;
@@ -71,6 +82,23 @@ class vF_system
 		$this->curlSupport = ( extension_loaded( 'curl' ) and ( empty( $this->disableFunctions ) or ( ! empty( $this->disableFunctions ) and ! preg_grep( '/^curl\_/', $this->disableFunctions ) ) ) ) ? true : false;
 		$this->opendirSupport = ( function_exists( 'opendir' ) and ! in_array( 'opendir', $this->disableFunctions ) ) ? true : false;
 		$this->rewriteSupport = $this->_checkRewriteSupport();
+
+		$this->serverProtocol = vF_input::getInstance()->Env( "HTTPS" ) ? 'https' : 'http';
+		$this->serverName = $_SERVER['SERVER_NAME'];
+		$this->serverPort = ( $_SERVER['SERVER_PORT'] == "80" ? '' : ':' . $_SERVER['SERVER_PORT'] );
+		$this->forumPath = $this->_getForumPath(); 
+
+		$this->forumDomain = $this->serverProtocol . '://' . $this->serverName . $this->serverPort;
+		$this->siteUrl = $this->forumDomain . $this->forumPath;
+		$this->adminFile = vF_constant::vF_ADMIN_FILE;
+		$this->adminUrl = $this->siteUrl . '/' . $this->adminFile;
+
+		$this->cookieDomain = vF_input::getInstance()->cookieDomain;
+		$this->cookiePath = vF_input::getInstance()->cookiePath;
+		$this->cookiePrefix = vF_input::getInstance()->cookiePrefix;
+
+		if( !isset( $_COOKIE ) ) $_COOKIE = array();
+		$this->_sessionStart();
 
 		$this->_systemStarted = true;
 	}
@@ -119,4 +147,45 @@ class vF_system
 		return false;
 	}
 
+	protected function _getForumPath()
+	{
+		$baseSiteUrl = pathinfo( $_SERVER['PHP_SELF'], PATHINFO_DIRNAME );
+		if ( $baseSiteUrl == DIRECTORY_SEPARATOR ) return '';
+
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = str_replace( DIRECTORY_SEPARATOR, '/', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "/[\/]+$/", '', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "/^[\/]*(.*)$/", '/\\1', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "#/index\.php(.*)$#", '', $baseSiteUrl );
+
+		return $baseSiteUrl;
+	}
+
+	protected function _sessionStart()
+	{
+		session_set_cookie_params( vF_constant::vF_LIVE_SESSION_TIME, $this->cookiePath, $this->cookieDomain, 0, 1 );
+		session_start();
+		$_SESSION = ( isset( $_SESSION ) and is_array( $_SESSION ) ) ? $_SESSION : array();
+		if ( sizeof( $_SESSION ) )
+		{
+			$array_keys = array_keys( $_SESSION );
+			foreach ( $array_keys as $k )
+			{
+				if ( !preg_match( "/^[a-zA-Z0-9\_]+$/", $k ) or is_numeric( $k ) )
+				{
+					unset( $_SESSION[$k] );
+				}
+			}
+		}
+		$this->isSessionStart = true;
+	}
+
+	public function getDisableFunctions()
+	{
+		return $this->disableFunctions;
+	}
+
+	public function getForumPath()
+	{
+		return $this->forumPath;
+	}
 }
