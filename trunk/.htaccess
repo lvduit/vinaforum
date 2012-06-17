@@ -11,3 +11,13 @@
   order allow,deny
   deny from all
 </Files>
+
+# Rewrite
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^([A-z0-9]+)(\/?)$ index.php?module=$1 [L]
+RewriteRule ^([A-z0-9]+)\/([A-z0-9]+)(\/?)$ index.php?module=$1&option=$2 [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule (.*)(\/|\.html)$ index.php
+</IfModule>
