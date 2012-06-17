@@ -6,6 +6,7 @@ vF_Check();
 # Author: Yplit
 # Date: 13/6/2012
 #-----------------------
+
 function arrayMapMerge( array $first, array $second )
 {
 	$args = func_get_args();
