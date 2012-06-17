@@ -9,13 +9,14 @@ vF_Check();
 class vF_getClient
 {
 	private static $_instance;
-	public $IP;
-	public $browser;
-	public $Os;
-	public $userAgent;
-	public $referer;
-	public $clientHash;
-	public $isMobile;
+	public $IP = false;
+	public $browser = '';
+	public $Os = '';
+	public $userAgent = '';
+	public $referer = '';
+	public $clientHash = '';
+	public $isMobile = false;
+	public $cookieEnble;
 
 	public function __construct()
 	{
@@ -32,19 +33,21 @@ class vF_getClient
 
 	public function getClient()
 	{
-		require( vF_DIR . '/vF_Core/functions/client.php' );
-		if( !$this->userAgent ) $this->userAgent = $this->_getUserAgent();
-		if( !$this->IP ) $this->IP = $this->_getIP();
-		if( !$this->browser ) $this->browser = $this->_getBrowser();
-		if( !$this->Os ) $this->Os = $this->_getOs();
-		if( !$this->referer ) $this->referer = $this->_getReferer();
+		require_once( vF_DIR . '/vF_Core/functions/client.php' );
+		if( ! $this->userAgent ) $this->userAgent = $this->_getUserAgent();
+		if( ! $this->IP ) $this->IP = $this->_getIP();
+		if( ! $this->browser ) $this->browser = $this->_getBrowser();
+		if( ! $this->Os ) $this->Os = $this->_getOs();
+		if( ! $this->referer ) $this->referer = $this->_getReferer();
 
-		if( !$this->clientHash )
+		if( ! $this->clientHash )
 		{
 			$this->clientHash = vF_hash::getInstance()->hashString( $this->userAgent );
 		}
 
-		if( !$this->isMobile ) $this->isMobile = $this->checkMobile();
+		if( !$this->isMobile ) $this->isMobile = ( $this->checkMobile() ? 1 : 0 );
+
+		//$this->cookieEnble = ( $this->_testCookie() ? 1 : 0 );
 
 		return $this;
 	}
@@ -142,19 +145,14 @@ class vF_getClient
 
 		if (isset($_SERVER['X-OperaMini-Features']))
 			return true;
-
 		if( isset( $_SERVER['UA-pixels'] ) )
 			return true;
-
 		if( isset( $_SERVER['HTTP_X_WAP_PROFILE'] ) OR isset( $_SERVER['HTTP_PROFILE'] ) )
 			return true;
-
 		if (isset($_SERVER['HTTP_ACCEPT']) && preg_match("/wap\.|\.wap/i", $_SERVER["HTTP_ACCEPT"]))
 			return true;
-
 		if ( preg_match('/(mini 9.5|vx1000|lge |m800|e860|u940|ux840|compal|wireless| mobi|ahong|lg380|lgku|lgu900|lg210|lg47|lg920|lg840|lg370|sam-r|mg50|s55|g83|t66|vx400|mk99|d615|d763|el370|sl900|mp500|samu3|samu4|vx10|xda_|samu5|samu6|samu7|samu9|a615|b832|m881|s920|n210|s700|c-810|_h797|mob-x|sk16d|848b|mowser|s580|r800|471x|v120|rim8|c500foma:|160x|x160|480x|x640|t503|w839|i250|sprint|w398samr810|m5252|c7100|mt126|x225|s5330|s820|htil-g1|fly v71|s302|-x113|novarra|k610i|-three|8325rc|8352rc|sanyo|vx54|c888|nx250|n120|mtk |c5588|s710|t880|c5005|i;458x|p404i|s210|c5100|teleca|s940|c500|s590|foma|samsu|vx8|vx9|a1000|_mms|myx|a700|gu1100|bc831|e300|ems100|me701|me702m-three|sd588|s800|8325rc|ac831|mw200|brew |d88|htc\/|htc_touch|355x|m50|km100|d736|p-9521|telco|sl74|ktouch|m4u\/|me702|8325rc|kddi|phone|lg |sonyericsson|samsung|240x|x320|vx10|nokia|sony cmd|motorola|up.browser|up.link|mmp|symbian|smartphone|midp|wap|vodafone|o2|pocket|kindle|mobile|psp|treo)/i', $this->userAgent ) )
 			return true;
-
 		if( preg_match("/Nokia([^\/]+)\/([^ SP]+)/i", $this->userAgent, $matches ) )
 		{
 			if( stripos( $this->userAgent, 'Series60' ) !== false || strpos( $this->userAgent, 'S60' ) !== false)
@@ -168,7 +166,6 @@ class vF_getClient
 		}
 
 		$browsers = vF_ParseIniFile( vF_DIR . '/vF_Core/file/ini/mobile.ini' );
-
 		if ( !empty( $browsers ) )
 		{
 			foreach( $browsers as $key => $info )
@@ -186,4 +183,8 @@ class vF_getClient
 		return false;
 	}
 
+	protected function _testCookie()
+	{
+		return ( vF_input::getInstance()->testCookie() ? true : false );
+	}
 }
