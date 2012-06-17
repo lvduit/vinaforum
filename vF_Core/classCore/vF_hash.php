@@ -10,7 +10,7 @@ class vF_Hash
 
 	public function __construct()
 	{
-		$this->vF = $GLOBALS['vF'];
+		//$this->vF = $GLOBALS['vF'];
 	}
 
 	public static function getInstance()

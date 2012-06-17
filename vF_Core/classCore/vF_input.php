@@ -39,7 +39,11 @@ class vF_input
 	
 	public function __construct()
 	{
-		$this->vF = $GLOBALS['vF'];
+		//$this->vF = $GLOBALS['vF'];
+		$this->cookieDomain = $this->_getCookieDomain();
+		$this->cookiePath = $this->_getCookiePath();
+		$this->cookiePrefix = ( isset( $GLOBALS['vF_Config']->cookiePrefix ) ? $GLOBALS['vF_Config']->cookiePrefix : 'vF_' );
+		$this->sessionPath = $this->_getSessionPath();
 	}
 
 	public static function getInstance()
@@ -50,6 +54,32 @@ class vF_input
 		}
 
 		return self::$_instance;
+	}
+
+	public function _getCookieDomain()
+	{
+		$this->serverName = $_SERVER['SERVER_NAME'];
+		$cookieDomain = preg_replace( "/^([w]{3})\./", "", $this->serverName );
+		$cookieDomain = ( preg_match( "/^([0-9a-z][0-9a-z-]+\.)+[a-z]{2,6}$/", $cookieDomain ) ) ? '.' . $cookieDomain : '';
+		return $cookieDomain;
+	}
+
+	private function _getCookiePath()
+	{
+		return $this->_getForumPath() . '/';
+	}
+
+	public function _getForumPath()
+	{
+		$baseSiteUrl = pathinfo( $_SERVER['PHP_SELF'], PATHINFO_DIRNAME );
+		if ( $baseSiteUrl == DIRECTORY_SEPARATOR ) return '';
+
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = str_replace( DIRECTORY_SEPARATOR, '/', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "/[\/]+$/", '', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "/^[\/]*(.*)$/", '/\\1', $baseSiteUrl );
+		if ( ! empty( $baseSiteUrl ) ) $baseSiteUrl = preg_replace( "#/index\.php(.*)$#", '', $baseSiteUrl );
+
+		return $baseSiteUrl;
 	}
 
 	public function setServerName( $serverName )
@@ -114,10 +144,12 @@ class vF_input
 
 	public function unsetCookie( $cookieName )
 	{
+		$cookieName = $this->cookiePrefix . $cookieName;
+
 		if( $this->issetCookie( $cookieName ) )
 		{
-			$this->_setCookie( $cookieName, '', $vF->system->time - 365*24*60*60 );
-			//unset( $_COOKIE["$cookieName"] );
+			$this->_setCookie( $cookieName, '', $GLOBALS['vF']->system->time - 365*24*60*60 );
+			unset( $_COOKIE["$cookieName"] );
 		}
 		return true;
 	}
@@ -145,7 +177,7 @@ class vF_input
 	{
 		if( !$_COOKIE ) return false;
 			$cookieName = $this->cookiePrefix . $cookieName;
-		if( !$_COOKIE["$cookieName"] ) return false;
+		if( !isset( $_COOKIE["$cookieName"] ) ) return false;
 		if( empty( $_COOKIE["$cookieName"] ) ) return false;
 		return true;
 	}
@@ -274,11 +306,67 @@ class vF_input
 		return $value;
 	}
 
+	protected function _getSessionPath()
+	{
+		$savePath = '';
+		$path = vF_constant::vF_RESOURCE_DIR . '/' . vF_constant::vF_SESSION_DIR;
+		$disableFunctions = vF_system::getInstance()->getDisableFunctions();
+
+		if ( function_exists( 'session_save_path' ) and !in_array( 'session_save_path', $disableFunctions ) )
+		{
+			if ( !empty( $path ) )
+			{
+				$savePath = vF_DIR . '/' . $path;
+				if ( !is_dir( $savePath ) )
+				{
+					$oldumask = umask( 0 );
+					$res = @mkdir( $savePath, 0755 );
+					umask( $oldumask );
+				}
+
+				if ( !@is_writable( $savePath ) )
+				{
+					if ( !@chmod( $savePath ) ) $savePath = '';
+				}
+
+				clearstatcache();
+				if ( ! empty( $savePath ) ) session_save_path( $savePath . '/' );
+			}
+		}
+
+		return session_save_path();
+	}
+
+	public function testCookie()
+	{
+		$this->addCookie( 'vfTestCookie', md5( $this->cookiePrefix ) );
+		$cookie = $this->getCookie( 'vfTestCookie', '' );
+		$this->unsetCookie( 'vfTestCookie' );
+		return ( $cookie == md5( $this->cookiePrefix ) );
+	}
+
 	protected function _cleanAll()
 	{
-		foreach( $this->_method as $method )
-		{
-			$$method = array();
-		}
+		if( isset( $_GET ) ) $_GET = array();
+		if( isset( $_POST ) ) $_POST = array();
+		$_REQUEST = array();
+		$this->endSession();
+		$_COOKIE = array();
+	}
+
+	public function Env( $key )
+	{
+		require_once( vF_DIR . '/vF_Core/functions/client.php' );
+		return vF_GetEnv( $key );
+	}
+
+	public function hashCookieValue( $value )
+	{
+		if( empty( $value ) OR !is_string( $value ) ) return $value;
+
+		$key = md5( $this->cookiePrefix . !empty( $GLOBALS['vF_Config']->key ) ? $GLOBALS['vF_Config']->key : '' );
+		$keyOne = md5( substr( $key, 0, 16 ) );
+		$keyTwo = md5( substr( $key, 16, 32 ) );
+		return md5( $value . $keyOne ) . $keyTwo;
 	}
 }
