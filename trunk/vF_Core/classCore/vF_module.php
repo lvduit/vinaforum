@@ -39,11 +39,7 @@ class vF_module
 		$db->query( 'SELECT * FROM `'. $db->tableName( 'premission' ) .'` WHERE `moduleID` = '. $this->getModuleId( $moduleName ) .' LIMIT 1' );
 		if( $db->nums() == 0 ) return false;
 		$result = $db->fetch_object();
-		#
-		#
-		# vF_Error::getInstance()->notModule( $moduleName );
-		#
-		#
+		# vF_rrror::getInstance()->mduleError( $moduleName );
 	}
 
 	public function getModuleId( $moduleName )
@@ -118,8 +114,14 @@ class vF_module
 			$db = vF_getVf::get('Db');
 			$db->query( 'SELECT `moduleName` FROM `'. $db->tableName( 'modules' ) .'` WHERE `active` = 1 ' );
 			if( $db->nums() == 0 ) return $this->vF->Options->vf_default_module;
-			$listModule = $db->fetchrow();
+
+			while( $result = $db->fetchrow() )
+			{
+				$listModule[] = $result['moduleName'];
+			}
+
 			if( !$listModule or count( $listModule ) == 0 ) return $this->vF->Options->vf_default_module;
+
 			if( $this->vF->Options->vf_cache_module )
 			{
 				vF_cache::getInstance()->newCache( 'moduleList', $listModule );
