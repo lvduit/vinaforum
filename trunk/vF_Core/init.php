@@ -14,7 +14,7 @@ $vF = vF_init::getInstance();
 $vF->System = vF_system::getInstance();
 $vF->System->startSystem();
 $vF->System->debug = ( $vF_Config->debug !== true ? false : true );
-$vF->Input = vF_input::getInstance();
+//$vF->Input = vF_input::getInstance();
 $vF->Client = vF_getClient::getInstance()->getClient();
 $vF->Db = vF_database::getInstance( $vF_Config );
 //$vF->User = vF_getUser::getInstance()->getUser();
